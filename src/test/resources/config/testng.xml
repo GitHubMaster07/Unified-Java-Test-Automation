@@ -2,19 +2,29 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="SDET Automation Suite" thread-count="1" parallel="methods">
 
+    <!-- Test configuration for the CI/CD pipeline -->
     <listeners>
+        <!-- Integrates Allure Reporting for rich HTML reports -->
         <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
     </listeners>
 
-    <test name="API Regression Tests">
+    <test name="Automation Regression Tests"> <!-- Updated name -->
         <groups>
             <run>
+                <!-- These group names match the -Dgroups=... flag in your ci.yml -->
                 <include name="api"/>
                 <include name="regression"/>
+                <include name="ui"/> <!-- Added UI group -->
             </run>
         </groups>
         <classes>
+            <!-- API Tests -->
             <class name="api.BookingApiTests"/>
+
+            <!-- UI Tests (NEW) -->
+            <class name="ui.LoginUiTests"/>
+
+            <!-- Add other API, Data, and UI test classes here as you write them -->
         </classes>
     </test>
 </suite>

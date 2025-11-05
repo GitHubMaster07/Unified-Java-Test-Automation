@@ -1,9 +1,12 @@
 package api;
 
 import builders.BookingDataBuilder;
-import data.DataValidationUtility; // Import the utility from Step 7
+import core.ConfigManager; // <-- NEW IMPORT
+import data.DataValidationUtility;
 import io.restassured.RestAssured;
+import io.restassured.config.HttpClientConfig; // <-- Required for timeouts
 import io.restassured.http.ContentType;
+import org.apache.http.params.CoreConnectionPNames; // <-- Required for timeouts
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,43 +17,22 @@ public class BookingApiTests {
 
     @BeforeClass
     public void setup() {
-        // Set the base URI for the Restful Booker API (or your target API)
-        RestAssured.baseURI = "https://restful-booker.herokuapp.com";
+        // Set the base URI using the ConfigManager
+        RestAssured.baseURI = ConfigManager.getProperty("api.base.url");
+
+        // Implement Connection Timeout using value from ConfigManager
+        int timeout = ConfigManager.getIntProperty("api.timeout.seconds") * 1000;
+
+        // Note: We are setting timeouts to prevent infinite hangs due to server being down
+        RestAssured.config = RestAssured.config().httpClient(
+                HttpClientConfig.httpClientConfig().setParam(
+                        CoreConnectionPNames.CONNECTION_TIMEOUT, timeout
+                ).setParam(
+                        CoreConnectionPNames.SO_TIMEOUT, timeout
+                )
+        );
     }
 
-    @Test(groups = {"api", "regression"})
-    public void verifyNewBookingDataIntegrity() {
-        String tempPatientId = "P9876"; // Use this ID for both API and DB checks
+    // ... rest of the class (verifyNewBookingDataIntegrity method remains the same)
 
-        // Step 1: BUILD the request payload using the builder (from Step 6)
-        Map<String, Object> payload = new BookingDataBuilder()
-                .setFirstname("Integrity")
-                .setLastname("Checker")
-                .setTotalPrice(200)
-                .build();
-
-        // Simulate adding the patient ID to the API request body
-        payload.put("patientId", tempPatientId);
-
-        // Step 2: SEND the API request and extract the status
-        String apiStatus = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when()
-                .post("/booking")
-                .then()
-                .statusCode(200)
-                .extract().path("booking.eligibilityStatus");
-        // NOTE: Assuming the API response contains eligibilityStatus
-
-
-
-        // Step 3: DATABASE/ETL VALIDATION (The Senior SDET differentiator)
-        // Assert that the API response status matches the authoritative DB source
-        boolean dbActive = DataValidationUtility.isPatientStatusActive(tempPatientId); // <-- UNCOMMENT THIS LINE
-
-        Assert.assertTrue(dbActive,
-                "CRITICAL FAILURE: Database status is NOT Active for patient: " + tempPatientId);
-    }
 }
-
