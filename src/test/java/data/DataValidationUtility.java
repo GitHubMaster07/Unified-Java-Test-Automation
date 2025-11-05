@@ -1,48 +1,85 @@
 package data;
 
-// Removed all java.sql.* imports as they are no longer needed for the mock
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * Utility class for connecting to a database (via JDBC) to validate data integrity.
- * NOTE: DB connection is mocked for portfolio stability and CI/CD demonstration.
+ * Utility class for database validation and queries.
  */
 public class DataValidationUtility {
-    // NOTE: Connection variables are now irrelevant but kept for documentation
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/testdb";
-    private static final String USER = "test_user";
-    private static final String PASS = "test_password";
 
-    public static boolean isPatientStatusActive(String patientId) {
-        // --- SENIOR SDET PORTFOLIO MOCK ---
-        // This logic simulates a successful database query result for demonstration purposes.
+    private String dbUrl;
+    private String dbUser;
+    private String dbPassword;
 
-        // If the patient ID starts with 'P', assume the DB returned 'ACTIVE' status.
-        if (patientId != null && patientId.startsWith("P")) {
-            System.out.println("INFO: MOCK DB CHECK - Patient ID " + patientId + " is considered ACTIVE.");
-            return true;
-        } else {
-            System.out.println("INFO: MOCK DB CHECK - Patient ID is NOT active or invalid.");
-            return false;
-        }
+    /**
+     * Constructor to initialize DB credentials.
+     * @param dbUrl JDBC URL, e.g., "jdbc:mysql://localhost:3306/dbname"
+     * @param dbUser Database username
+     * @param dbPassword Database password
+     */
+    public DataValidationUtility(String dbUrl, String dbUser, String dbPassword) {
+        this.dbUrl = dbUrl;
+        this.dbUser = dbUser;
+        this.dbPassword = dbPassword;
+    }
 
-        /*
-        // --- ORIGINAL CODE COMMENTED OUT TO PREVENT SQL EXCEPTION FAILURE ON CI/CD ---
-        String sql = "SELECT status FROM patient_eligibility WHERE patient_id = ? AND effective_date >= CURRENT_DATE;";
+    /**
+     * Executes a SELECT query and prints the results.
+     * @param query SQL query string
+     */
+    public void executeSelectQuery(String query) {
+        try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+             PreparedStatement ps = connection.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int columnCount = rs.getMetaData().getColumnCount();
 
-            stmt.setString(1, patientId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return "ACTIVE".equalsIgnoreCase(rs.getString("status"));
+            while (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    System.out.print(rs.getString(i) + "\t");
+                }
+                System.out.println();
             }
-            return false;
+
         } catch (SQLException e) {
-            System.err.println("Database connection error: " + e.getMessage());
-            return false;
+            e.printStackTrace();
         }
-        */
+    }
+
+    /**
+     * Executes an UPDATE/INSERT/DELETE query.
+     * @param query SQL query string
+     * @return number of rows affected
+     */
+    public int executeUpdateQuery(String query) {
+        try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            return ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // Example usage
+    public static void main(String[] args) {
+        DataValidationUtility dbUtil = new DataValidationUtility(
+                "jdbc:mysql://localhost:3306/your_db_name",
+                "your_username",
+                "your_password"
+        );
+
+        // Example SELECT
+        dbUtil.executeSelectQuery("SELECT * FROM users");
+
+        // Example UPDATE
+        int rowsUpdated = dbUtil.executeUpdateQuery("UPDATE users SET status='active' WHERE id=1");
+        System.out.println("Rows updated: " + rowsUpdated);
     }
 }

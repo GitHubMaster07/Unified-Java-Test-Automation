@@ -5,60 +5,60 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import java.time.Duration;
 
-/**
- * Base class for all UI tests. Manages WebDriver initialization, ThreadLocal usage
- * for parallel execution, and cleanup, following the TestNG lifecycle.
- */
 public class BaseUITest {
 
-    private static final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
-    protected static final Logger logger = LogManager.getLogger(BaseUITest.class);
+    protected static final Logger log = LogManager.getLogger(BaseUITest.class);
+    private final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
 
-    // Retrieve BASE_URL from configuration
-    private static final String BASE_URL = ConfigManager.getProperty("ui.base.url");
-
-    protected WebDriver getDriver() {
-        return driverThreadLocal.get();
-    }
-
+    // Protected method to initialize the WebDriver
     @BeforeMethod(alwaysRun = true)
-    public void setupBrowser() {
-        logger.info("Setting up WebDriver for the current thread using browser: {}", ConfigManager.getProperty("ui.browser"));
-
+    protected void setupBrowser() {
+        log.info("Setting up WebDriver for the current thread.");
         WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
-        options.addArguments("--no-sandbox");
+        // --- START IMPROVED CONFIG READING (Line 27 area) ---
+        String timeoutValue = ConfigManager.getProperty("ui.timeout.seconds");
+        int timeout = 10; // Default implicit wait to 10 seconds for robustness
 
-        WebDriver driver = new ChromeDriver(options);
+        try {
+            if (timeoutValue != null && !timeoutValue.trim().isEmpty()) {
+                timeout = Integer.parseInt(timeoutValue.trim());
+            } else {
+                log.warn("Property 'ui.timeout.seconds' not found or empty. Defaulting to {} seconds.", timeout);
+            }
+        } catch (NumberFormatException e) {
+            // Log the error but continue with the default timeout
+            log.error("Invalid number format for 'ui.timeout.seconds'='{}'. Defaulting to 10 seconds.", timeoutValue, e);
+        }
 
-        // Retrieve implicit timeout from configuration
-        int implicitTimeout = ConfigManager.getIntProperty("ui.timeout.seconds");
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitTimeout));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(timeout));
+        // --- END IMPROVED CONFIG READING ---
+
         driver.manage().window().maximize();
 
         driverThreadLocal.set(driver);
-
-        logger.info("WebDriver successfully initialized. Navigating to {}", BASE_URL);
-        driver.get(BASE_URL);
+        log.info("WebDriver initialized and stored in ThreadLocal.");
     }
 
+    // Protected method to clean up the WebDriver
     @AfterMethod(alwaysRun = true)
-    public void teardownBrowser() {
+    protected void tearDownBrowser() {
         WebDriver driver = driverThreadLocal.get();
         if (driver != null) {
-            logger.info("Closing and quitting WebDriver.");
+            log.info("Quitting WebDriver for the current thread.");
             driver.quit();
             driverThreadLocal.remove();
         }
+    }
+
+    // Public getter method for the driver instance
+    public WebDriver getDriver() {
+        return driverThreadLocal.get();
     }
 }

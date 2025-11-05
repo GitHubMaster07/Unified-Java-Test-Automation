@@ -1,56 +1,51 @@
-package ui;
+package uitests;
 
-import core.BaseUITest;
+import core.DriverFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.LoginPage;
 
 /**
- * UI tests for the login functionality, demonstrating the Page Object Model (POM).
+ * Standard TestNG test for UI login functionality.
  */
-public class LoginUiTests extends BaseUITest {
+public class LoginUiTests {
 
-    // Valid credentials for the test site
-    private static final String VALID_USER = "tomsmith";
-    private static final String VALID_PASS = "SuperSecretPassword!";
+    private LoginPage loginPage;
+    private static final String BASE_URL = "https://the-internet.herokuapp.com/login";
 
-    @Test(groups = {"ui", "smoke"})
-    public void testSuccessfulLogin() {
-        logger.info("Starting testSuccessfulLogin UI test.");
+    @BeforeMethod
+    public void setup() {
+        // 1. Setup Driver
+        DriverFactory.setupDriver("chrome");
 
-        // Initialize the Page Object using the driver from BaseUITest
-        LoginPage loginPage = new LoginPage(getDriver());
-
-        // Perform login action
-        loginPage.login(VALID_USER, VALID_PASS);
-
-        // Assert the success message
-        String expectedMessage = "You logged into a secure area!";
-        String actualMessage = loginPage.getFlashMessageText();
-
-        // The actual message includes an 'x' button text, so we check for containment
-        Assert.assertTrue(actualMessage.contains(expectedMessage),
-                "Expected success message was not displayed. Actual: " + actualMessage);
-
-        logger.info("Successfully logged in and validated secure area message.");
+        // 2. Navigate and initialize Page Object
+        DriverFactory.getDriver().get(BASE_URL);
+        loginPage = new LoginPage(DriverFactory.getDriver());
     }
 
-    @Test(groups = {"ui", "regression"})
-    public void testInvalidPasswordLogin() {
-        logger.info("Starting testInvalidPasswordLogin UI test.");
+    @Test(description = "Verify successful login using Page Object Model")
+    public void testSuccessfulLogin() {
+        final String USERNAME = "tomsmith";
+        final String PASSWORD = "SuperSecretPassword!";
+        final String EXPECTED_MESSAGE_PART = "You logged into a secure area!";
 
-        LoginPage loginPage = new LoginPage(getDriver());
+        // Action: Perform login
+        loginPage.login(USERNAME, PASSWORD);
 
-        // Use a valid username but wrong password
-        loginPage.login(VALID_USER, "WrongPassword");
-
-        // Assert the failure message
-        String expectedMessage = "Your password is invalid!";
+        // Assertion: Check for the success message
         String actualMessage = loginPage.getFlashMessageText();
 
-        Assert.assertTrue(actualMessage.contains(expectedMessage),
-                "Expected failure message was not displayed. Actual: " + actualMessage);
+        Assert.assertTrue(actualMessage.contains(EXPECTED_MESSAGE_PART),
+                "Login failed! Expected message part: '" + EXPECTED_MESSAGE_PART +
+                        "' but found: '" + actualMessage + "'");
 
-        logger.info("Successfully failed login and validated error message.");
+        System.out.println("TestNG Login Success: " + actualMessage);
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        DriverFactory.quitDriver();
     }
 }

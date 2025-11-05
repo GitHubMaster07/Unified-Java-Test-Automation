@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="SDET Automation Suite" thread-count="1" parallel="methods">
+<suite name="SDET Automation Suite" thread-count="4" parallel="tests">
 
-    <!-- Test configuration for the CI/CD pipeline -->
     <listeners>
-        <!-- Integrates Allure Reporting for rich HTML reports -->
         <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
     </listeners>
 
-    <test name="Automation Regression Tests"> <!-- Updated name -->
+    <test name="Functional Regression Tests">
         <groups>
             <run>
-                <!-- These group names match the -Dgroups=... flag in your ci.yml -->
                 <include name="api"/>
                 <include name="regression"/>
-                <include name="ui"/> <!-- Added UI group -->
+                <include name="ui"/>
             </run>
         </groups>
+        <packages>
+            <package name="api.*"/>
+            <package name="ui.*"/>
+            <package name="db.*"/>
+        </packages>
+    </test>
+
+    <test name="BDD Scenarios (Cucumber)">
         <classes>
-            <!-- API Tests -->
-            <class name="api.BookingApiTests"/>
-
-            <!-- UI Tests (NEW) -->
-            <class name="ui.LoginUiTests"/>
-
-            <!-- Add other API, Data, and UI test classes here as you write them -->
+            <class name="runners.TestRunner"/>
         </classes>
     </test>
 </suite>
