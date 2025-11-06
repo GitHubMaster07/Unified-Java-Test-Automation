@@ -31,16 +31,21 @@ It provides a **unified structure** for UI, API, and Database testing with built
 ## 🧩 Framework Structure
 
 src/test/java/
-│── core/ → DriverFactory, ConfigManager
-│── pages/ → Page Objects (POM)
-│── stepdefs/ → Step Definitions (BDD)
-│── runners/ → TestNG/Cucumber runners
-│── api/ → API automation using RestAssured
-│── data/ → DB validation & utilities
-│
-src/test/resources/
-│── features/ → Feature files
-│── config/ → Config & environment files
+    │── core/ → DriverFactory, ConfigManager
+    
+    │── pages/ → Page Objects (POM)
+    
+    │── stepdefs/ → Step Definitions (BDD)
+    
+    │── runners/ → TestNG/Cucumber runners
+    
+    │── api/ → API automation using RestAssured
+    
+    │── data/ → DB validation & utilities
+    │
+    src/test/resources/
+    │── features/ → Feature files
+    │── config/ → Config & environment files
 
 ---
 
