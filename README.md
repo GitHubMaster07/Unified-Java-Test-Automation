@@ -1,27 +1,102 @@
-Senior-SDET-Automation-FrameworkA robust, scalable, and reliable automation framework demonstrating Senior SDET expertise and best practices for Shift-Left quality assurance.
+# 🚀 Senior-SDET-Automation-Framework
 
-🎯 Project Overview & Core ValueThis framework utilizes a Test Pyramid approach to prioritize fast, stable backend validation. It is designed to be highly maintainable and easily integrated into any modern CI/CD pipeline.Key Value Proposition: This architecture reduces regression cycle time by enabling parallel execution and focusing test effort on high-risk, high-ROI areas (API and Data integrity).
+![Java](https://img.shields.io/badge/Language-Java_11-blue?logo=java)
+![Selenium](https://img.shields.io/badge/UI%20Testing-Selenium-green?logo=selenium)
+![RestAssured](https://img.shields.io/badge/API%20Testing-RestAssured-yellowgreen)
+![Cucumber](https://img.shields.io/badge/BDD-Cucumber-brightgreen?logo=cucumber)
+![Maven](https://img.shields.io/badge/Build-Maven-orange?logo=apachemaven)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![Allure](https://img.shields.io/badge/Reports-Allure-blueviolet)
 
-🛠️ Technical Stack & Framework Architecture
-Component              Technology                Rationale
-Language:              Java 17+                  Industry standard for enterprise stability and performance.
-Build Tool:            Maven                     Standardized project and dependency management.
-API Testing:           Rest Assured              High-performance, fluent API for integration and contract testing.
-UI Testing:            Selenium / Playwright     Used for end-to-end (E2E) customer journey validation (only on critical paths).
-Data Validation:       JDBC / Advanced SQL       Custom utility for validating data integrity during ETL/Data Migration checks.
-Test Runner:           TestNG / Cucumber(BDD)    Supports data-driven testing, grouping, and parallel execution.
-Reporting:             Allure Reporting          Generates rich, interactive, and shareable reports for complete traceability.
+---
 
-🏗️ Architectural Design PrinciplesThe framework adheres to strict software development principles for maximum maintainability:
-- Page Object Model (POM): Ensures reusable, readable UI code and separates test logic from page locators.
-- Builder Pattern: Used for constructing complex API request payloads and consistent Test Data Management (TDM).
-- Layered Structure: Clear separation of tests, utilities, resource files, and core framework components.
+### 🧠 Overview
+A **hybrid test automation framework** that combines **Selenium WebDriver**, **Cucumber (BDD)**, **RestAssured**, **TestNG**, and **JDBC**.  
+It provides a **unified structure** for UI, API, and Database testing with built-in CI/CD and reporting support.
 
-🔗 Continuous Testing & ExecutionThe framework is fully configured for automated execution:
-- Containerization: Includes a Dockerfile for seamless, repeatable execution in any environment.
-- CI/CD: Uses GitHub Actions (.github/workflows/ci.yml) to automatically build and run tests on every push to the main branch.
+---
 
-  Execution Commands:
-- Run All Tests (Smoke/API): mvn clean test -Dgroups=smoke,api
-- Run Parallel Regression: mvn clean test -DsuiteXmlFile=testng-parallel.xml
-- Generate Allure Report: allure generate --clean && allure open
+## ⚙️ Tech Stack
+| Layer | Tool / Library | Purpose |
+|-------|----------------|----------|
+| **UI** | Selenium WebDriver | Web UI testing |
+| **API** | RestAssured | REST API validation |
+| **BDD** | Cucumber + TestNG | Behavior-Driven testing |
+| **Database** | JDBC + SQL | Backend validation |
+| **Build & CI/CD** | Maven, Jenkins, GitHub Actions | Continuous integration |
+| **Reports** | Allure, Cucumber HTML | Detailed execution results |
+
+---
+
+## 🧩 Framework Structure
+
+src/test/java/
+│── core/ → DriverFactory, ConfigManager
+│── pages/ → Page Objects (POM)
+│── stepdefs/ → Step Definitions (BDD)
+│── runners/ → TestNG/Cucumber runners
+│── api/ → API automation using RestAssured
+│── data/ → DB validation & utilities
+│
+src/test/resources/
+│── features/ → Feature files
+│── config/ → Config & environment files
+
+---
+
+## 🧪 Execution Commands
+### Run all tests
+```bash
+mvn clean test
+
+🧠 Sample BDD Feature
+Feature: User Login Functionality
+  @ui @smoke
+  Scenario: Successful Login with Valid Credentials
+    Given the user is on the Login page
+    When the user enters the username "tomsmith" and password "SuperSecretPassword!"
+    And the user clicks the Login button
+    Then the user should be redirected to the secure area
+
+🧰 Key Features
+
+✅ Hybrid BDD + Page Object Model
+
+✅ Parallel Execution (ThreadLocal WebDriver)
+
+✅ Unified UI + API + DB Testing
+
+✅ Centralized Config & Environment Management
+
+✅ Detailed Reporting (Allure & Cucumber HTML)
+
+✅ Easy Jenkins/GitHub Actions Integration
+
+✅ Screenshot Capture on Failures
+
+🧱 Continuous Integration Example
+# .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Build and test with Maven
+        run: mvn clean test
+      - name: Generate Allure Report
+        run: |
+          npm install -g allure-commandline --save-dev
+          allure generate target/allure-results --clean -o target/allure-report
+
+👨‍💻 Author
+Sergei Volodin
+🧪 Senior Software Development Engineer in Test (SDET)
+📍 Chicago, IL
+🏗️ Built with passion for scalable, maintainable, and enterprise-grade test automation.
