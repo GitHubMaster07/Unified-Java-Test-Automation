@@ -49,6 +49,8 @@ src/test/resources/
 ```bash
 mvn clean test
 
+---
+
 🧠 Sample BDD Feature
 Feature: User Login Functionality
   @ui @smoke
@@ -57,6 +59,8 @@ Feature: User Login Functionality
     When the user enters the username "tomsmith" and password "SuperSecretPassword!"
     And the user clicks the Login button
     Then the user should be redirected to the secure area
+
+---
 
 🧰 Key Features
 
@@ -73,6 +77,8 @@ Feature: User Login Functionality
 ✅ Easy Jenkins/GitHub Actions Integration
 
 ✅ Screenshot Capture on Failures
+
+---
 
 🧱 Continuous Integration Example
 # .github/workflows/ci.yml
@@ -95,8 +101,11 @@ jobs:
           npm install -g allure-commandline --save-dev
           allure generate target/allure-results --clean -o target/allure-report
 
+---
+
 👨‍💻 Author
 Sergei Volodin
 🧪 Senior Software Development Engineer in Test (SDET)
 📍 Chicago, IL
+https://github.com/GitHubMaster07/-Sergei-Volodin-_portfolio
 🏗️ Built with passion for scalable, maintainable, and enterprise-grade test automation.
