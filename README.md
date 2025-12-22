@@ -73,6 +73,10 @@ src/test/java/
 
 ---
 
+🧱 Production-Ready CI/CD
+- This framework is optimized for Stateless Execution in containers.
+- Automatic Failure Recovery: Integrated TestNG Listeners for screenshots and retries.
+- Artifact Preservation: GitHub Actions uploads allure-report as a permanent deployment artifact for audit trails.
 
 👨‍💻 Author
 Sergei Volodin
