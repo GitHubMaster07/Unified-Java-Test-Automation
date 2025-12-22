@@ -10,21 +10,27 @@
 
 ---
 
-### 🧠 Overview
-A **hybrid test automation framework** that combines **Selenium WebDriver**, **Cucumber (BDD)**, **RestAssured**, **TestNG**, and **JDBC**.  
-It provides a **unified structure** for UI, API, and Database testing with built-in CI/CD and reporting support.
+### 🧠 Strategic Overview
+This is an **Enterprise-level Hybrid Framework** designed for high-scalability testing. It provides a unified orchestration layer for **UI (Selenium)**, **Backend (REST API)**, and **Data Integrity (Database)** within a BDD-driven ecosystem.
 
 ---
 
-## ⚙️ Tech Stack
-| Layer | Tool / Library | Purpose |
-|-------|----------------|----------|
-| **UI** | Selenium WebDriver | Web UI testing |
-| **API** | RestAssured | REST API validation |
-| **BDD** | Cucumber + TestNG | Behavior-Driven testing |
-| **Database** | JDBC + SQL | Backend validation |
-| **Build & CI/CD** | Maven, Jenkins, GitHub Actions | Continuous integration |
-| **Reports** | Allure, Cucumber HTML | Detailed execution results |
+## 🏗️ Architectural Patterns
+- **Fluent POM**: Optimized Page Object Model using method chaining for readable, maintainable test scripts.
+- **ThreadLocal Thread Safety**: Engineered for high-parallelization in CI/CD without browser session conflicts.
+- **Factory Design Pattern**: Centralized WebDriver and API Request Specification management.
+- **Validation Layers**: Multi-layer verification (UI vs Database) to ensure data persistence and front-end accuracy.
+
+---
+
+## ⚙️ Advanced Tech Stack
+| Layer | Technology | Implementation Detail |
+|-------|------------|-----------------------|
+| **Core** | Java 11 / Maven | Type-safe, dependency-managed core. |
+| **UI Engine** | Selenium 4 | W3C compliant grid-ready drivers. |
+| **API Engine** | RestAssured | Gherkin-style API validation. |
+| **Validation** | JDBC / TestNG | Robust assertions and DB connectivity. |
+| **Observability** | Allure / Log4j2 | High-fidelity logs and stakeholder reports. |
 
 ---
 
@@ -49,24 +55,6 @@ src/test/java/
 
 ---
 
-## 🧪 Execution Commands
-### Run all tests
-```bash
-mvn clean test
-
----
-
-🧠 Sample BDD Feature
-Feature: User Login Functionality
-  @ui @smoke
-  Scenario: Successful Login with Valid Credentials
-    Given the user is on the Login page
-    When the user enters the username "tomsmith" and password "SuperSecretPassword!"
-    And the user clicks the Login button
-    Then the user should be redirected to the secure area
-
----
-
 🧰 Key Features
 
 ✅ Hybrid BDD + Page Object Model
@@ -85,32 +73,9 @@ Feature: User Login Functionality
 
 ---
 
-🧱 Continuous Integration Example
-# .github/workflows/ci.yml
-name: CI
-on: [push, pull_request]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-      - name: Build and test with Maven
-        run: mvn clean test
-      - name: Generate Allure Report
-        run: |
-          npm install -g allure-commandline --save-dev
-          allure generate target/allure-results --clean -o target/allure-report
-
----
 
 👨‍💻 Author
 Sergei Volodin
-🧪 Senior Software Development Engineer in Test (SDET)
-📍 Chicago, IL
-https://github.com/GitHubMaster07/-Sergei-Volodin-_portfolio
-🏗️ Built with passion for scalable, maintainable, and enterprise-grade test automation.
+- 🧪 Senior Software Development Engineer in Test (SDET)
+- 📍 Chicago, IL
+- 🏗️ Built with passion for scalable, maintainable, and enterprise-grade test automation.
