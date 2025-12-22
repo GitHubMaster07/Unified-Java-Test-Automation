@@ -79,7 +79,7 @@ src/test/java/
 - Artifact Preservation: GitHub Actions uploads allure-report as a permanent deployment artifact for audit trails.
 
 👨‍💻 Author
-Sergei Volodin
+**Sergei Volodin**
 - 🧪 Senior Software Development Engineer in Test (SDET)
 - 📍 Chicago, IL
 - 🏗️ Built with passion for scalable, maintainable, and enterprise-grade test automation.
