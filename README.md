@@ -37,37 +37,23 @@ This is an **Enterprise-level Hybrid Framework** designed for high-scalability t
 ## 🧩 Framework Structure
 ### 🧱 Framework Architecture
 ```text
-java-selenium-bdd-framework/
+Unified-Java-Test-Automation/
 ├── src/
 │   ├── main/java/
-│   │   └── core/                 # Framework Engine
-│   │       ├── DriverFactory.java   # ThreadLocal Selenium management
-│   │       ├── ConfigManager.java   # properties/env loader
-│   │       ├── BasePage.java        # Common Selenium wrappers (waits/clicks)
-│   │       └── APIClient.java       # RestAssured base specifications
+│   │   ├── builders/           # Test Data Builders (e.g., BookingDataBuilder)
+│   │   └── core/               # Framework Engine (Config, DriverFactory, DBManager)
 │   └── test/java/
-│       ├── api/                  # API Logic
-│       │   ├── endpoints/           # API routes & constants
-│       │   └── payloads/            # JSON POJO models
-│       ├── pages/                # UI Logic (Page Object Model)
-│       │   ├── LoginPage.java       # Fluent POM implementation
-│       │   └── DashboardPage.java
-│       ├── db/                   # Database Logic
-│       │   └── DatabaseUtils.java   # JDBC connection & query methods
-│       ├── stepdefs/             # BDD Glue Code
-│       │   ├── Hooks.java           # Setup/Teardown (@Before/@After)
-│       │   └── LoginSteps.java
-│       └── runners/              # Execution Control
-│           └── TestRunner.java      # TestNG/Cucumber parallel config
+│       ├── api/                # API Test Logic & Controllers
+│       ├── db/                 # Database Assertions & Validation
+│       ├── pages/              # Page Object Model (POM) Implementations
+│       ├── runners/            # TestNG/Cucumber Parallel Runners
+│       ├── stepdefs/           # BDD Step Definitions (Glue Code)
+│       └── ui/                 # UI-specific Utilities/Hooks
 ├── src/test/resources/
-│   ├── features/                 # Gherkin Scenarios
-│   │   ├── auth.feature
-│   │   └── api_validation.feature
-│   ├── testdata/                 # Static JSON/CSV data files
-│   └── config.properties         # Global framework configurations
-├── .gitattributes                # Repository language optimization
-├── pom.xml                       # Maven dependencies & build lifecycle
-└── README.md                     # Project documentation
+│   ├── config/                 # Environment-specific properties
+│   ├── features/               # BDD Gherkin Feature Files
+│   └── application.properties   # Global Test Settings
+└── pom.xml                     # Maven Dependency Management
 ```
 ---
 
