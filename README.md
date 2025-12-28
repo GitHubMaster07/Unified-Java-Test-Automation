@@ -15,11 +15,15 @@ This is an **Enterprise-level Hybrid Framework** designed for high-scalability t
 
 ---
 
-## 🏗️ Architectural Patterns
-- **Fluent POM**: Optimized Page Object Model using method chaining for readable, maintainable test scripts.
-- **ThreadLocal Thread Safety**: Engineered for high-parallelization in CI/CD without browser session conflicts.
-- **Factory Design Pattern**: Centralized WebDriver and API Request Specification management.
-- **Validation Layers**: Multi-layer verification (UI vs Database) to ensure data persistence and front-end accuracy.
+## 🚀 Advanced Architectural Patterns
+
+This framework is built using industry-standard design patterns to ensure enterprise-level scalability and maintainability.
+
+* **Dual-Core Orchestration**: Separates the **Framework Engine** (`src/main/java/core`) for browser and DB management from the **Test Orchestrator** (`src/test/java/core`), ensuring a decoupled, stateless architecture.
+* **Factory Design Pattern**: Implements a `DriverFactory` utilizing `ThreadLocal<WebDriver>` to guarantee thread safety during high-parallelization in CI/CD environments.
+* **Data Builder Pattern**: Utilizes `BookingDataBuilder` to dynamically generate complex, type-safe test data for both API payloads and UI inputs, eliminating hard-coded data flakiness.
+* **Fluent Page Object Model (POM)**: Page objects use method chaining to create a "human-readable" DSL for test scripts, improving developer experience and script readability.
+* **Multi-Layer Validation**: Integrated `db/` and `api/` controllers allow for full-stack integrity checks, validating that front-end actions correctly persist in the backend database.
 
 ---
 
