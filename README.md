@@ -68,6 +68,43 @@ Unified-Java-Test-Automation/
 ```
 ---
 
+### 📖 Sample Hybrid Test Showcase
+This framework allows for cross-layer validation within a single scenario.
+```Gherkin
+Scenario: User updates profile and verifies via Backend API
+  Given the user is logged into the web portal
+  When the user updates their nickname to "SeniorSDET_01"
+  Then the Backend API should return "SeniorSDET_01" for the updated user record
+```
+
+```Java
+@Then("the Backend API should return {string} for the updated user record")
+public void verifyViaAPI(String expectedName) {
+    Response response = userApiController.getUser(userId);
+    Assert.assertEquals(response.jsonPath().getString("nickname"), expectedName);
+}
+```
+### ⚙️ Getting Started
+1. Prerequisites
+JDK 11+ (Amazon Corretto or Temurin)
+
+Maven 3.8+
+
+IDE: IntelliJ IDEA (Recommended)
+
+2. Execution
+```Bash
+# Run all tests via Maven
+mvn test
+
+# Run a specific TestNG suite
+mvn test -DsuiteXmlFile=src/test/resources/runners/smoke.xml
+
+# Generate & Open Allure Report
+mvn allure:report
+mvn allure:serve
+```
+
 ### 🧰 Key Features
 
 ✅ Hybrid BDD + Page Object Model
