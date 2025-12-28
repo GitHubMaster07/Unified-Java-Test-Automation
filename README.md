@@ -111,6 +111,8 @@ public void searchAndVerifyProduct() {
 - Automatic Failure Recovery: Integrated TestNG Listeners for screenshots and retries.
 - Artifact Preservation: GitHub Actions uploads allure-report as a permanent deployment artifact for audit trails.
 
+For the high-level strategy and planning behind this framework, see my Test-Strategy-Documentation-Samples repository(https://github.com/GitHubMaster07/Test-Strategy-Documentation-Samples.git).
+
 ### 👨‍💻 Author
 **Sergei Volodin**
 - 🧪 Senior Software Development Engineer in Test (SDET)
