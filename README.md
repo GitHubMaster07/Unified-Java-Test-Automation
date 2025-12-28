@@ -85,14 +85,14 @@ public void verifyViaAPI(String expectedName) {
 }
 ```
 ### ⚙️ Getting Started
-1. Prerequisites
+**1. Prerequisites**
 JDK 11+ (Amazon Corretto or Temurin)
 
 Maven 3.8+
 
 IDE: IntelliJ IDEA (Recommended)
 
-2. Execution
+**2. Execution**
 ```Bash
 # Run all tests via Maven
 mvn test
@@ -104,6 +104,13 @@ mvn test -DsuiteXmlFile=src/test/resources/runners/smoke.xml
 mvn allure:report
 mvn allure:serve
 ```
+
+### 🔍 Failure Analysis & Observability
+- **Automatic Screenshots:** Integrated TestNG Listeners capture full-page screenshots at the exact moment of failure, attached directly to reports.
+
+- **Thread-Safe Logging:** Log4j2 captures every UI action, API request, and SQL query for deep-dive root cause analysis.
+
+- **Artifact Preservation:** GitHub Actions automatically uploads Allure results as permanent deployment artifacts for audit trails.
 
 ### 🧰 Key Features
 
