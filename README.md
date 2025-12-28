@@ -35,6 +35,13 @@ This is an **Enterprise-level Hybrid Framework** designed for high-scalability t
 ---
 
 ## 🧩 Framework Structure
+
+**Factory Design Pattern:** The core/DriverFactory manages ThreadLocal<WebDriver> instances, ensuring thread safety during parallel execution in CI/CD pipelines.
+
+**Data Builder Pattern:** The builders/ package allows for the creation of complex API payloads and UI test data dynamically, reducing hard-coded values and script maintenance.
+
+**Hybrid Validation:** By combining the api/ and db/ layers, the framework can perform "behind-the-scenes" data verification immediately after a UI action occurs.
+
 ### 🧱 Framework Architecture
 ```text
 Unified-Java-Test-Automation/
