@@ -35,27 +35,43 @@ This is an **Enterprise-level Hybrid Framework** designed for high-scalability t
 ---
 
 ## 🧩 Framework Structure
-
-src/test/java/
-    │── core/ → DriverFactory, ConfigManager
-    
-    │── pages/ → Page Objects (POM)
-    
-    │── stepdefs/ → Step Definitions (BDD)
-    
-    │── runners/ → TestNG/Cucumber runners
-    
-    │── api/ → API automation using RestAssured
-    
-    │── data/ → DB validation & utilities
-    │
-    src/test/resources/
-    │── features/ → Feature files
-    │── config/ → Config & environment files
-
+### 🧱 Framework Architecture
+```text
+java-selenium-bdd-framework/
+├── src/
+│   ├── main/java/
+│   │   └── core/                 # Framework Engine
+│   │       ├── DriverFactory.java   # ThreadLocal Selenium management
+│   │       ├── ConfigManager.java   # properties/env loader
+│   │       ├── BasePage.java        # Common Selenium wrappers (waits/clicks)
+│   │       └── APIClient.java       # RestAssured base specifications
+│   └── test/java/
+│       ├── api/                  # API Logic
+│       │   ├── endpoints/           # API routes & constants
+│       │   └── payloads/            # JSON POJO models
+│       ├── pages/                # UI Logic (Page Object Model)
+│       │   ├── LoginPage.java       # Fluent POM implementation
+│       │   └── DashboardPage.java
+│       ├── db/                   # Database Logic
+│       │   └── DatabaseUtils.java   # JDBC connection & query methods
+│       ├── stepdefs/             # BDD Glue Code
+│       │   ├── Hooks.java           # Setup/Teardown (@Before/@After)
+│       │   └── LoginSteps.java
+│       └── runners/              # Execution Control
+│           └── TestRunner.java      # TestNG/Cucumber parallel config
+├── src/test/resources/
+│   ├── features/                 # Gherkin Scenarios
+│   │   ├── auth.feature
+│   │   └── api_validation.feature
+│   ├── testdata/                 # Static JSON/CSV data files
+│   └── config.properties         # Global framework configurations
+├── .gitattributes                # Repository language optimization
+├── pom.xml                       # Maven dependencies & build lifecycle
+└── README.md                     # Project documentation
+```
 ---
 
-🧰 Key Features
+### 🧰 Key Features
 
 ✅ Hybrid BDD + Page Object Model
 
@@ -71,14 +87,38 @@ src/test/java/
 
 ✅ Screenshot Capture on Failures
 
+👨‍💻 **Developer Experience (Fluent API)**
+
+The framework utilizes method chaining to create highly readable test scripts:
+```java
+@Test
+public void searchAndVerifyProduct() {
+    homePage
+        .load()
+        .searchFor("MacBook")
+        .selectFirstProduct()
+        .addToCart()
+        .verifySuccessMessage("Added to cart");
+}
+```
 ---
 
-🧱 Production-Ready CI/CD
+> [!TIP]
+> ### 🎯 Engineering Standards (Definition of Done)
+> To maintain enterprise-grade reliability, all automation in this repository adheres to the following "Quality Gates":
+> * **Zero-Flakiness Policy**: New scripts must pass 5 consecutive local runs and a CI-pipeline check before being merged to `main`.
+> * **Separation of Concerns**: Strict architectural boundaries—No test assertions in **Page Objects**; no Selenium locators in **Step Definitions**.
+> * **Stateless Execution**: Tests are designed to be independent; each scenario handles its own data setup and teardown via API or DB hooks to prevent "domino effect" failures.
+> * **Atomic Scenarios**: Each BDD scenario focuses on a single business outcome to ensure fast debugging and clear reporting.
+
+---
+
+### 🧱 Production-Ready CI/CD
 - This framework is optimized for Stateless Execution in containers.
 - Automatic Failure Recovery: Integrated TestNG Listeners for screenshots and retries.
 - Artifact Preservation: GitHub Actions uploads allure-report as a permanent deployment artifact for audit trails.
 
-👨‍💻 Author
+### 👨‍💻 Author
 **Sergei Volodin**
 - 🧪 Senior Software Development Engineer in Test (SDET)
 - 📍 Chicago, IL
