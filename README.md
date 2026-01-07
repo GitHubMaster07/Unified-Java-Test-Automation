@@ -1,27 +1,95 @@
-Senior-SDET-Automation-FrameworkA robust, scalable, and reliable automation framework demonstrating Senior SDET expertise and best practices for Shift-Left quality assurance.
+# Unified Java Test Automation Engine (Senior SDET Level)
 
-🎯 Project Overview & Core ValueThis framework utilizes a Test Pyramid approach to prioritize fast, stable backend validation. It is designed to be highly maintainable and easily integrated into any modern CI/CD pipeline.Key Value Proposition: This architecture reduces regression cycle time by enabling parallel execution and focusing test effort on high-risk, high-ROI areas (API and Data integrity).
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Java: 11](https://img.shields.io/badge/Java-11-blue.svg)
+![Framework: Hybrid](https://img.shields.io/badge/Framework-Hybrid--Orchestration-orange.svg)
 
-🛠️ Technical Stack & Framework Architecture
-Component              Technology                Rationale
-Language:              Java 17+                  Industry standard for enterprise stability and performance.
-Build Tool:            Maven                     Standardized project and dependency management.
-API Testing:           Rest Assured              High-performance, fluent API for integration and contract testing.
-UI Testing:            Selenium / Playwright     Used for end-to-end (E2E) customer journey validation (only on critical paths).
-Data Validation:       JDBC / Advanced SQL       Custom utility for validating data integrity during ETL/Data Migration checks.
-Test Runner:           TestNG / Cucumber(BDD)    Supports data-driven testing, grouping, and parallel execution.
-Reporting:             Allure Reporting          Generates rich, interactive, and shareable reports for complete traceability.
+## 📌 Overview
+**Unified-Java-Test-Automation** is an Enterprise-level Hybrid Framework designed for high-scalability testing. It provides a unified orchestration layer for **UI** (Selenium), **Backend** (REST API), and **Data Integrity** (Database) within a **BDD-driven ecosystem**.
 
-🏗️ Architectural Design PrinciplesThe framework adheres to strict software development principles for maximum maintainability:
-- Page Object Model (POM): Ensures reusable, readable UI code and separates test logic from page locators.
-- Builder Pattern: Used for constructing complex API request payloads and consistent Test Data Management (TDM).
-- Layered Structure: Clear separation of tests, utilities, resource files, and core framework components.
+This engine is built to handle complex E2E business flows where a single scenario might require API state preparation, UI interaction, and subsequent DB validation.
 
-🔗 Continuous Testing & ExecutionThe framework is fully configured for automated execution:
-- Containerization: Includes a Dockerfile for seamless, repeatable execution in any environment.
-- CI/CD: Uses GitHub Actions (.github/workflows/ci.yml) to automatically build and run tests on every push to the main branch.
+---
 
-  Execution Commands:
-- Run All Tests (Smoke/API): mvn clean test -Dgroups=smoke,api
-- Run Parallel Regression: mvn clean test -DsuiteXmlFile=testng-parallel.xml
-- Generate Allure Report: allure generate --clean && allure open
+## 🏗 Architectural Layers
+
+### 1. UI Layer (Selenium POM)
+- **Design Pattern**: Page Object Model (POM) with Page Factory.
+- **Features**: Automatic element waiting, cross-browser support, and screenshot capturing on failure.
+- **Location**: `src/test/java/pages/`
+
+### 2. API Layer (RestAssured)
+- **Capabilities**: Full CRUD operations validation, JSON Schema matching, and POJO serialization.
+- **Purpose**: Fast backend verification and test data setup.
+- **Location**: `src/test/java/api/`
+
+### 3. Data Integrity Layer (JDBC/Database)
+- **Function**: Direct SQL execution to verify data persistence and backend business logic.
+- **Integration**: Validates that UI/API actions reflected correctly in the DB.
+- **Location**: `src/test/java/db/`
+
+### 4. BDD & Orchestration (Cucumber)
+- **Language**: Gherkin (Feature files).
+- **Hooks**: Sophisticated `@Before` and `@After` hooks for environment setup and teardown.
+- **Location**: `src/test/java/stepdefs/` & `src/test/java/runners/`
+
+---
+
+## 🛠 Tech Stack
+- **Core**: Java 11
+- **Build Tool**: Maven 3.x
+- **UI Engine**: Selenium WebDriver
+- **API Engine**: RestAssured
+- **Database**: JDBC / SQL
+- **Test Runner**: JUnit 4/5 + Cucumber 7.x
+- **Reporting**: Allure Framework
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- JDK 11
+- Maven installed and configured in system PATH
+- Chrome/Edge Browser (for UI tests)
+
+### Installation
+```bash
+git clone [https://github.com/GitHubMaster07/Unified-Java-Test-Automation.git](https://github.com/GitHubMaster07/Unified-Java-Test-Automation.git)
+cd Unified-Java-Test-Automation
+mvn clean compile
+```
+---
+
+## Execution
+Run all tests (Hybrid Mode):
+
+```Bash
+mvn clean test
+```
+Run specific layer by Tags:
+```
+```Bash
+mvn test -Dcucumber.filter.tags="@API"
+```
+```
+mvn test -Dcucumber.filter.tags="@UI"
+```
+```
+mvn test -Dcucumber.filter.tags="@Database"
+```
+---
+
+## 📊 Reporting & Analytics
+The framework generates detailed Allure reports. To view the latest results:
+
+Generate and open report:
+
+```Bash
+allure serve allure-results
+```
+## ⚖️ License
+Distributed under the MIT License.
+
+## 👨‍💻 Author
+**Sergei Volodin** Senior SDET / Automation Architect
