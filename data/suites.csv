@@ -1,0 +1,4 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"  As a user of the web application,
+  I want to be able to log in successfully,
+  So that I can access my secure areas.","8776","Successful Login with Valid Credentials","","Wed Jan 07 10:26:05 UTC 2026","passed","Wed Jan 07 10:26:14 UTC 2026","","User Login Functionality","Successful Login with Valid Credentials",""
