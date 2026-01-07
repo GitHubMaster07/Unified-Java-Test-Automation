@@ -13,7 +13,6 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- Dependency Versions -->
         <selenium.version>4.19.1</selenium.version>
         <testng.version>7.9.0</testng.version>
         <cucumber.version>7.15.0</cucumber.version>
@@ -26,30 +25,23 @@
     </properties>
 
     <dependencies>
-
-        <!-- UI AUTOMATION CORE -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
-
         </dependency>
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
             <version>${webdrivermanager.version}</version>
-
         </dependency>
 
-        <!-- TEST RUNNER & ASSERTIONS -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- BDD CUCUMBER -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
@@ -63,15 +55,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- API TESTING -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${rest-assured.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- DATABASE (POSTGRESQL) -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -79,21 +68,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- LOGGING FIX: SLF4J NOP (No-Operation) BINDING -->
-        <!-- This dependency suppresses the "Failed to load class StaticLoggerBinder" warning -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- LOGGING IMPLEMENTATION (Log4j2) -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j2.version}</version>
-
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -101,7 +85,6 @@
             <version>${log4j2.version}</version>
         </dependency>
 
-        <!-- REPORTING (Allure) -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-testng</artifactId>
@@ -114,29 +97,23 @@
             <version>${allure.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Compiler Plugin: Ensures the project is compiled using the correct Java version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <release>11</release>
                 </configuration>
             </plugin>
-
-            <!-- Surefire Plugin: Executes the TestNG tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- Points the runner to the TestNG XML file we created -->
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/config/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
