@@ -3,10 +3,9 @@ package builders;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Builds the JSON payload for creating a booking, demonstrating the Builder Pattern.
- */
-public class BookingDataBuilder {
+
+//Builds the JSON payload for creating a booking.
+ public class BookingDataBuilder {
     private String firstname;
     private String lastname;
     private int totalprice;
@@ -20,7 +19,7 @@ public class BookingDataBuilder {
         bookingdates.put("checkout", "2025-01-05");
     }
 
-    // Setter methods return 'this' (the builder object)
+    
     public BookingDataBuilder setFirstname(String firstname) {
         this.firstname = firstname;
         return this;
