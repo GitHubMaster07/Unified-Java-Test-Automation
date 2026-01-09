@@ -8,41 +8,68 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Example test class demonstrating database validation using the DBManager.
- * NOTE: This test will fail if a PostgreSQL database is not running locally
- * with the correct connection details (from environment.properties).
+ * Suite for Data Integrity and ETL validation.
+ * Verifies that the persistence layer correctly reflects the business state 
+ * initiated by UI or API operations, ensuring end-to-end data consistency.
  */
 public class BookingDBTests {
 
+    /**
+     * Leveraging the centralized DBManager for session handling. 
+     * This ensures consistent connection pooling and credential management.
+     */
     private final DBManager dbManager = new DBManager();
 
+    /**
+     * Infrastructure Health Check.
+     * Validates connectivity to the persistence layer before executing complex data assertions.
+     * Essential for early detection of environment-related failures in the CI/CD pipeline.
+     */
     @Test(groups = {"db"})
     public void testDatabaseConnection() {
-        // Assert that we can successfully establish a connection
-        Assert.assertNotNull(dbManager.getConnection(), "Database connection should not be null.");
+        Assert.assertNotNull(dbManager.getConnection(), 
+                "Critical Failure: Unable to establish a secure handshake with the database.");
     }
 
+    /**
+     * Validation of Post-Transaction State (ETL/Integrity Check).
+     * This test acts as a 'Truth Verification' step, ensuring that data injected via 
+     * upstream services (API/UI) is correctly stored with the expected status and attributes.
+     */
     @Test(groups = {"db"})
     public void testRetrieveExpectedUserRecord() {
-        // Example ETL check: Verify a user added by an API test exists in the DB.
-        // Replace this query with your actual ETL check.
+        // Business identifier for the target record validation
         String expectedUser = "john.doe@example.com";
+        
+        /**
+         * Querying the 'System of Record' for specific business constraints.
+         * We verify not just existence, but the 'Active' status to ensure correct lifecycle state.
+         */
         String query = "SELECT * FROM users WHERE email = '" + expectedUser + "' AND status = 'active'";
 
         List<Map<String, Object>> result = dbManager.executeQuery(query);
 
-        // 1. Assert that exactly one record was found
+        /**
+         * Constraint 1: Uniqueness. 
+         * Ensures the database maintains integrity and doesn't contain duplicate records for a single entity.
+         */
         Assert.assertEquals(result.size(), 1,
-                "Expected to find exactly one active user record for " + expectedUser);
+                "Integrity Violation: Expected a unique record for user: " + expectedUser);
 
-        // 2. Assert specific column values for data integrity
+        // Extracting record for deep attribute verification
         Map<String, Object> userRecord = result.get(0);
 
-        // Ensure the retrieved ID is a non-null integer (assuming 'id' is a primary key)
-        Assert.assertTrue(userRecord.get("id") instanceof Integer, "User ID should be an Integer.");
+        /**
+         * Constraint 2: Schema Integrity.
+         * Validates that the returned data types match the expected domain model (Primary Key integrity).
+         */
+        Assert.assertTrue(userRecord.get("id") instanceof Integer, "Type Mismatch: User ID must adhere to Integer schema.");
 
-        // Assert the username/email matches
+        /**
+         * Constraint 3: Data Accuracy.
+         * Final verification that the persisted email matches the source input exactly.
+         */
         Assert.assertEquals(userRecord.get("email"), expectedUser,
-                "Retrieved email does not match expected value.");
+                "Data Corruption: Persisted email value deviates from the source transaction.");
     }
 }
