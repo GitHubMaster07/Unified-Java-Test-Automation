@@ -1,13 +1,12 @@
 name: Test Automation Pipeline
 
-# Trigger orchestration on code delivery or integration requests
 on: [push, pull_request]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    # Elevated permissions required for Allure history persistence and GitHub Pages hosting
+    # Permissions for GitHub Pages deployment and Allure history updates
     permissions:
       contents: write
       pages: write
@@ -25,11 +24,11 @@ jobs:
           cache: maven
 
       - name: Run API and UI Tests
-        # Executing critical path scenarios (@api and @smoke) in headless mode for CI stability
+        # Headless mode is mandatory for CI; filtering by tags to reduce execution time
         run: mvn test -Dcucumber.filter.tags="@api or @smoke" -Dheadless=true
 
       - name: Get Allure history
-        # Fetching historical trend data from the dedicated hosting branch (gh-pages)
+        # Pulling existing trends from gh-pages to maintain historical data
         uses: actions/checkout@v3
         if: always()
         continue-on-error: true
@@ -38,7 +37,6 @@ jobs:
           path: gh-pages
 
       - name: Generate Allure Report
-        # Aggregating test results into a unified visual analytics dashboard
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
@@ -48,7 +46,6 @@ jobs:
           keep_reports: 20
 
       - name: Deploy report to Github Pages
-        # Publishing the final report to the live environment for stakeholder visibility
         if: always()
         uses: peaceiris/actions-gh-pages@v3
         with:

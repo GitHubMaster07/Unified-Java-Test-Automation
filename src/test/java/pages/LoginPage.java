@@ -3,54 +3,38 @@ package pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-/**
- * Abstraction of the Authentication Interface (Login Page).
- * Encapsulates UI locators and business-facing actions to decouple test logic 
- * from the underlying DOM structure.
- */
 public class LoginPage {
     private final WebDriver driver;
 
-    /**
-     * Strategic Locators.
-     * Prioritizing unique IDs for high performance and stability. 
-     * CSS Selectors are utilized for complex button hierarchies where IDs are unavailable.
-     */
+    // Using stable IDs where possible. For the login button, a specific CSS hierarchy
+    // is required to avoid collision with other 'submit' buttons on the landing page.
     private final By usernameField = By.id("username");
     private final By passwordField = By.id("password");
     private final By loginButton = By.cssSelector("#login button[type='submit']");
     private final By secureAreaFlashMessage = By.id("flash");
 
-
     public LoginPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    /**
-     * Populates the identity credential field.
-     */
     public void enterUsername(String username) {
         driver.findElement(usernameField).sendKeys(username);
     }
 
-    /**
-     * Populates the security credential field.
-     */
     public void enterPassword(String password) {
         driver.findElement(passwordField).sendKeys(password);
     }
 
-    /**
-     * Triggers the authentication transaction.
-     */
     public void clickLoginButton() {
+        // Simple click is often enough, but if the UI gets laggy,
+        // we might need an explicit 'elementToBeClickable' wait here.
         driver.findElement(loginButton).click();
     }
 
     /**
-     * High-level business flow: User Authentication.
-     * Consolidates individual atomic actions into a single operational unit 
-     * to streamline test scenario development.
+     * Orchestrating the full auth sequence.
+     * Decoupling the login logic from the test steps ensures that changes in
+     * the auth flow (e.g., adding a 2FA step) only require a single fix here.
      */
     public void login(String username, String password) {
         enterUsername(username);
@@ -58,11 +42,9 @@ public class LoginPage {
         clickLoginButton();
     }
 
-    /**
-     * Accesses the operational feedback message (success/error).
-     * Provides a point of verification for authentication outcomes.
-     */
     public String getFlashMessageText() {
+        // Flash messages are often dynamic or time-sensitive (fade out).
+        // We fetch the text immediately to avoid 'StaleElementReferenceException'.
         return driver.findElement(secureAreaFlashMessage).getText();
     }
 }

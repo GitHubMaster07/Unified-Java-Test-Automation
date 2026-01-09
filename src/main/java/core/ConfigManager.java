@@ -1,71 +1,44 @@
 package core;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * Manages configuration properties loaded from the environment.properties file.
- * Ensures the properties are loaded only once (Singleton pattern for efficiency).
- **/
 public class ConfigManager {
-
-    private static final Logger logger = LogManager.getLogger(ConfigManager.class);
     private static final Properties properties = new Properties();
-    private static final String CONFIG_FILE = "config/environment.properties";
 
-    // Static block to ensure properties are loaded when the class is initialized
     static {
-        loadProperties();
-    }
-
-    private static void loadProperties() {
-        logger.info("Loading configuration from: {}", CONFIG_FILE);
-
-        try (InputStream input = ConfigManager.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
-            if (input == null) {
-                logger.error("FATAL: Configuration file '{}' not found in resources.", CONFIG_FILE);
-                throw new IOException("Configuration file not found: " + CONFIG_FILE);
-            }
-            properties.load(input);
-            logger.info("Configuration successfully loaded.");
-        } catch (IOException ex) {
-            logger.fatal("Failed to load configuration properties: {}", ex.getMessage());
-            // Exit immediately if critical configuration cannot be loaded
-            System.exit(1);
+        // Crashing early here is intentional.
+        // If the config is missing, we’d spend hours debugging random NullPointers later in the suite.
+        try (FileInputStream fis = new FileInputStream("src/test/resources/config/config.properties")) {
+            properties.load(fis);
+        } catch (IOException e) {
+            // No point in proceeding if the foundation layer is missing.
+            throw new RuntimeException("Fatal: config.properties is missing or unreadable. Check src/test/resources/config/", e);
         }
     }
 
-    /**
-     * Retrieves a string property value.
-     * @param key The key of the property.
-     * @return The string value.
-     */
     public static String getProperty(String key) {
-        String value = properties.getProperty(key);
-        if (value == null) {
-            logger.warn("Configuration key '{}' not found. Returning null.", key);
-        }
-        return value;
+        return properties.getProperty(key);
     }
 
-    /**
-     * Retrieves an integer property value.
-     * @param key The key of the property.
-     * @return The integer value, or -1 if the key is missing or the value is not an integer.
-     */
-    public static int getIntProperty(String key) {
-        String value = getProperty(key);
-        if (value != null) {
-            try {
-                return Integer.parseInt(value.trim());
-            } catch (NumberFormatException e) {
-                logger.error("Configuration key '{}' has a non-integer value: {}", key, value);
-            }
+    public static String getProperty(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
+
+    public static int getIntProperty(String key, int defaultValue) {
+        String value = properties.getProperty(key);
+        try {
+            // People often leave trailing spaces in property files by accident.
+            // .trim() is a cheap insurance policy against NumberFormatExceptions.
+            return (value != null) ? Integer.parseInt(value.trim()) : defaultValue;
+        } catch (NumberFormatException e) {
+            // Better to fall back to a safe default than to kill the whole test run over a typo.
+            return defaultValue;
         }
-        return -1; // Indicate failure or missing value
+    }
+
+    public static int getIntProperty(String key) {
+        return getIntProperty(key, 0);
     }
 }

@@ -1,55 +1,62 @@
 package core;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import java.time.Duration;
 
 public class DriverFactory {
-    private static WebDriver driver;
-    // Note: It's better to move BASE_URL to environment.properties later
-    public static final String BASE_URL = "https://the-internet.herokuapp.com/login";
+
+    // ThreadLocal prevents race conditions during parallel execution in TestNG.
+    // Each thread maintains its own isolated browser session to avoid shared state corruption.
+    private static final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
 
     public static void setupDriver(String browser) {
-        if (driver == null) {
+        if (driverThreadLocal.get() == null) {
+            WebDriver driver;
+
             switch (browser.toLowerCase()) {
                 case "chrome":
+                    WebDriverManager.chromedriver().setup();
                     ChromeOptions options = new ChromeOptions();
 
-                    // Check if headless mode is requested via System Property (e.g., from Maven/CI)
-                    boolean isHeadless = Boolean.parseBoolean(System.getProperty("headless", "false"));
+                    boolean isHeadless = Boolean.parseBoolean(ConfigManager.getProperty("headless", "false"));
 
                     if (isHeadless) {
-                        options.addArguments("--headless=new"); // New headless mode for Chrome
-                        options.addArguments("--disable-gpu");
-                        options.addArguments("--window-size=1920,1080");
-                        options.addArguments("--no-sandbox");
-                        options.addArguments("--disable-dev-shm-usage");
+                        // '--headless=new' is used to resolve rendering inconsistencies found in the legacy engine.
+                        // '--no-sandbox' is mandatory for stable execution within Docker/Linux containers.
+                        options.addArguments("--headless=new", "--disable-gpu", "--no-sandbox", "--window-size=1920,1080");
+                    } else {
+                        options.addArguments("--start-maximized");
                     }
 
                     driver = new ChromeDriver(options);
                     break;
                 default:
-                    throw new IllegalArgumentException("Unsupported browser: " + browser);
+                    throw new RuntimeException("Unsupported browser: " + browser);
             }
 
-            // Maximize only if not in headless (headless size is set via arguments)
-            if (!Boolean.parseBoolean(System.getProperty("headless", "false"))) {
-                driver.manage().window().maximize();
-            }
+            // Syncing implicit wait with global config to handle network latency across environments.
+            int timeout = ConfigManager.getIntProperty("timeout", 10);
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(timeout));
 
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            driverThreadLocal.set(driver);
         }
     }
 
     public static WebDriver getDriver() {
-        return driver;
+        return driverThreadLocal.get();
     }
 
+    /**
+     * Terminating the session and clearing the reference is required to prevent
+     * orphaned 'chromedriver.exe' processes and memory leaks in long-running CI loops.
+     */
     public static void quitDriver() {
-        if (driver != null) {
-            driver.quit();
-            driver = null;
+        if (driverThreadLocal.get() != null) {
+            driverThreadLocal.get().quit();
+            driverThreadLocal.remove();
         }
     }
 }

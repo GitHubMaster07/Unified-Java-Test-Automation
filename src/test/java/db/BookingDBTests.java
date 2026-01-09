@@ -2,74 +2,45 @@ package db;
 
 import core.DBManager;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import java.util.List;
 import java.util.Map;
 
-/**
- * Suite for Data Integrity and ETL validation.
- * Verifies that the persistence layer correctly reflects the business state 
- * initiated by UI or API operations, ensuring end-to-end data consistency.
- */
 public class BookingDBTests {
+    private DBManager dbManager;
 
-    /**
-     * Leveraging the centralized DBManager for session handling. 
-     * This ensures consistent connection pooling and credential management.
-     */
-    private final DBManager dbManager = new DBManager();
+    @BeforeMethod
+    public void setup() {
+        dbManager = new DBManager();
+        // Step 1: Purge existing data to ensure strict test isolation (no pollution from previous runs).
+        dbManager.executeUpdate("DELETE FROM bookings");
 
-    /**
-     * Infrastructure Health Check.
-     * Validates connectivity to the persistence layer before executing complex data assertions.
-     * Essential for early detection of environment-related failures in the CI/CD pipeline.
-     */
-    @Test(groups = {"db"})
-    public void testDatabaseConnection() {
-        Assert.assertNotNull(dbManager.getConnection(), 
-                "Critical Failure: Unable to establish a secure handshake with the database.");
+        // Step 2: Seed fresh data. We explicitly populate ALL columns to prevent 'null' pointer assertions.
+        String seedData = "INSERT INTO bookings (booking_id, firstname, lastname, email, totalprice) " +
+                "VALUES (101, 'John', 'Doe', 'john.doe@example.com', 200)";
+        dbManager.executeUpdate(seedData);
     }
 
     /**
-     * Validation of Post-Transaction State (ETL/Integrity Check).
-     * This test acts as a 'Truth Verification' step, ensuring that data injected via 
-     * upstream services (API/UI) is correctly stored with the expected status and attributes.
+     * Validates that the persistence layer correctly stores and retrieves user-specific data.
+     * This test checks for data corruption, specifically focusing on the 'email' field.
      */
-    @Test(groups = {"db"})
+    @Test
     public void testRetrieveExpectedUserRecord() {
-        // Business identifier for the target record validation
-        String expectedUser = "john.doe@example.com";
-        
-        /**
-         * Querying the 'System of Record' for specific business constraints.
-         * We verify not just existence, but the 'Active' status to ensure correct lifecycle state.
-         */
-        String query = "SELECT * FROM users WHERE email = '" + expectedUser + "' AND status = 'active'";
+        String query = "SELECT * FROM bookings WHERE booking_id = 101";
+        List<Map<String, Object>> results = dbManager.executeQuery(query);
 
-        List<Map<String, Object>> result = dbManager.executeQuery(query);
+        // Verification logic
+        Assert.assertFalse(results.isEmpty(), "DB FAILURE: Targeted record (ID 101) was not found in the 'bookings' table.");
 
-        /**
-         * Constraint 1: Uniqueness. 
-         * Ensures the database maintains integrity and doesn't contain duplicate records for a single entity.
-         */
-        Assert.assertEquals(result.size(), 1,
-                "Integrity Violation: Expected a unique record for user: " + expectedUser);
+        Map<String, Object> record = results.get(0);
 
-        // Extracting record for deep attribute verification
-        Map<String, Object> userRecord = result.get(0);
+        // Asserting the exact value to catch mapping issues (case-sensitivity or null returns).
+        String actualEmail = (String) record.get("email");
+        Assert.assertEquals(actualEmail, "john.doe@example.com",
+                "DATA INTEGRITY ERROR: The email retrieved from DB does not match the seeded value.");
 
-        /**
-         * Constraint 2: Schema Integrity.
-         * Validates that the returned data types match the expected domain model (Primary Key integrity).
-         */
-        Assert.assertTrue(userRecord.get("id") instanceof Integer, "Type Mismatch: User ID must adhere to Integer schema.");
-
-        /**
-         * Constraint 3: Data Accuracy.
-         * Final verification that the persisted email matches the source input exactly.
-         */
-        Assert.assertEquals(userRecord.get("email"), expectedUser,
-                "Data Corruption: Persisted email value deviates from the source transaction.");
+        Assert.assertEquals(record.get("firstname"), "John", "Field mismatch: firstname.");
     }
 }

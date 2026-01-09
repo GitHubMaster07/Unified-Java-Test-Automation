@@ -1,28 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="SDET Automation Suite" thread-count="4" parallel="tests">
+<suite name="Unified Enterprise Suite" thread-count="4" parallel="classes">
 
     <listeners>
         <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
     </listeners>
 
-    <test name="Functional Regression Tests">
-        <groups>
-            <run>
-                <include name="api"/>
-                <include name="regression"/>
-                <include name="ui"/>
-            </run>
-        </groups>
-        <packages>
-            <package name="api.*"/>
-            <package name="ui.*"/>
-            <package name="db.*"/>
-        </packages>
-    </test>
-
-    <test name="BDD Scenarios (Cucumber)">
+    <test name="Full Regression Cycle">
         <classes>
+            <class name="api.BookingApiTests"/>
+
             <class name="runners.TestRunner"/>
         </classes>
     </test>

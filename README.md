@@ -39,47 +39,64 @@ Unified-Java-Test-Automation/
 
 ---
 
-## 🛠️ Hybrid Layer Implementation
-⚡ REST API Layer (RestAssured)
-The API layer is designed for fast state preparation and backend validation.
+## 🔄 Unified Orchestration Flow
+⚡ The engine excels at complex E2E scenarios by synchronizing API, UI, and DB layers in a single execution thread.
 
-```Java
+```Gherkin
 
-// Example: API Contract Validation
-public void validateBookingCreated() {
-    given()
-        .header("Content-Type", "application/json")
-        .body(bookingPayload)
-    .when()
-        .post("/booking")
-    .then()
-        .statusCode(200)
-        .body(matchesJsonSchemaInClasspath("schemas/booking.json"));
-}
+Scenario: Create booking via API and verify across UI and Database
+Given I create a new booking via API with name "Sergei" and price 150
+And I navigate to the booking management dashboard
+Then I should see the booking for "Sergei" in the list
+And The database should contain a record for "Sergei" with price 150
 ```
+How it works under the hood:
+
+API Layer: Injects the state directly into the system, bypassing slow UI forms.
+
+Database Layer: Instantly verifies that the persistence layer (H2) has stored the correct values.
+
+UI Layer: Uses Selenium to ensure the end-user can actually interact with the data created via API.
+
 ## 🌐 UI Layer (Selenium POM)
-Implements Page Object Model with Page Factory for robust interaction.
+The UI layer implements the **Page Object Model (POM)** enhanced with **Selenium PageFactory**. This ensures a clean separation between page elements and test logic, while providing lazy initialization for optimized performance.
 
-```Java
+```java
+// Example: UI Page Object with PageFactory and Explicit Waits
+public class LoginPage {
+    private WebDriver driver;
+    private WebDriverWait wait;
 
-// Example: UI Page Element
-@FindBy(id = "login-button")
-private WebElement loginButton;
+    @FindBy(id = "login-button")
+    private WebElement loginButton;
 
-public void performLogin() {
-    wait.until(ExpectedConditions.elementToBeClickable(loginButton)).click();
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        PageFactory.initElements(driver, this); // Mandatory for @FindBy initialization
+    }
+
+    public void performLogin() {
+        // Using ExpectedConditions to mitigate flaky UI behavior on slow Windows environments
+        wait.until(ExpectedConditions.elementToBeClickable(loginButton)).click();
+    }
 }
 ```
-## 🗄️ Data Integrity Layer (Database)
-Verifies data consistency directly in the DB using JDBC.
+## 🗄️ Data Integrity Layer (H2 Database)
+The framework features a Self-Healing DB Manager that automatically synchronizes the In-Memory H2 schema with the test requirements. It ensures zero "Table Not Found" errors by auto-initializing the database upon the first connection.
 
 ```Java
 
-// Example: DB Integrity Check
-public boolean isBookingInDatabase(int id) {
-    String query = "SELECT * FROM bookings WHERE id = " + id;
-    ResultSet rs = dbExecutor.executeQuery(query);
-    return rs.next();
+// Example: Self-Healing DB Integrity Check
+public void verifyDatabaseRecord(int id) {
+    // The DBManager automatically ensures 'bookings' table exists
+    String query = "SELECT * FROM bookings WHERE booking_id = " + id;
+
+    // Results are returned as a List of Maps with normalized lowercase keys
+    List<Map<String, Object>> results = dbManager.executeQuery(query);
+
+    Assert.assertFalse(results.isEmpty(), "Data Integrity Error: Record not found.");
+    Assert.assertEquals(results.get(0).get("firstname"), "Sergei");
 }
 ```
 ## 🚀 Getting Started
@@ -97,25 +114,27 @@ mvn clean compile
 ```
 
 Execution
-Run specific layers using Cucumber tags:
+Run specific layers or full orchestration using Cucumber tags. Use clean to ensure fresh In-Memory DB state:
 
 ## Run all tests
-```
-mvn test
+```Bash
+mvn clean test
 ```
 ## Targeted execution
+```Bash
+# Run only E2E Orchestration (API + UI + DB)
+mvn clean test -Dcucumber.filter.tags="@regression"
 ```
-mvn test -Dcucumber.filter.tags="@API"
-```
-```
-mvn test -Dcucumber.filter.tags="@UI"
+```Bash
+# Run only Smoke tests
+mvn clean test -Dcucumber.filter.tags="@smoke"
 ```
 ## 📊 Analytics
-Results are processed via Allure Reports.
+Test execution data is captured and visualized via Allure Reports.
 
 ```Bash
 
-allure serve allure-results
+allure serve target/allure-results
 ```
 
 ⚖️ License

@@ -1,43 +1,48 @@
 package stepdefs;
 
 import core.DriverFactory;
+import core.ConfigManager;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import org.openqa.selenium.WebDriver;
+import io.cucumber.java.Scenario;
+import io.qameta.allure.Allure;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 
-/**
- * Lifecycle Orchestrator for BDD Scenarios.
- * Manages the setup and teardown of the test environment to ensure cross-scenario isolation
- * and efficient resource management.
- */
+import java.io.ByteArrayInputStream;
+
 public class Hooks {
 
-    private WebDriver driver;
+    // Selective initialization: we only fire up the browser for UI/E2E tags
+    // to avoid unnecessary overhead in pure API or Database test runs.
+    @Before("@ui or @e2e")
+    public void setUp() {
+        String browser = ConfigManager.getProperty("browser", "chrome");
+        DriverFactory.setupDriver(browser);
 
-    /**
-     * Environment Pre-Conditioning.
-     * Initializes the driver instance based on the target execution profile 
-     * and synchronizes the session with the application's base entry point.
-     */
-    @Before
-    public void setup() {
-        // Dynamic driver allocation (defaults to Chrome, extensible for multi-browser grids)
-        DriverFactory.setupDriver("chrome");
-
-        driver = DriverFactory.getDriver();
-
-        // Establishing initial state for the test scenario
-        driver.get(DriverFactory.BASE_URL);
+        String url = ConfigManager.getProperty("base.url");
+        if (url != null) {
+            // Ensuring the driver starts at the baseline URL to avoid 'blank page' errors on first steps.
+            DriverFactory.getDriver().get(url);
+        }
     }
 
-    /**
-     * Post-Execution Resource Decommissioning.
-     * Ensures the browser session is terminated and local resources are released 
-     * regardless of the scenario outcome (passed/failed).
-     */
-    @After
-    public void tearDown() {
-        // Guarantees zero-leak policy for browser processes
+    @After("@ui or @e2e")
+    public void tearDown(Scenario scenario) {
+        if (scenario.isFailed() && DriverFactory.getDriver() != null) {
+            // Capturing the DOM state at the exact moment of failure.
+            // This is the only way to debug flaky elements in headless mode.
+            byte[] screenshot = ((TakesScreenshot) DriverFactory.getDriver())
+                    .getScreenshotAs(OutputType.BYTES);
+
+            // Attaching to Cucumber and Allure simultaneously to ensure evidence
+            // persists regardless of which reporting tool is used.
+            scenario.attach(screenshot, "image/png", "Failure_Screenshot");
+            Allure.addAttachment("Terminal State on Failure", new ByteArrayInputStream(screenshot));
+        }
+
+        // Mandatory teardown. If this fails on Windows, chromedriver.exe will hang,
+        // eventually causing 'Out of Memory' on the CI agent.
         DriverFactory.quitDriver();
     }
 }

@@ -1,110 +1,92 @@
 package core;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Manages database connectivity (JDBC) and query execution for data validation.
- */
 public class DBManager {
 
-    private static final Logger logger = LogManager.getLogger(DBManager.class);
-    private final String dbUrl;
-    private final String dbUser;
-    private final String dbPassword;
-
-    public DBManager() {
-        this.dbUrl = ConfigManager.getProperty("db.url");
-        this.dbUser = ConfigManager.getProperty("db.user");
-        this.dbPassword = ConfigManager.getProperty("db.password");
-    }
-
     /**
-     * Establishes a connection to the database.
-     * @return A valid Connection object, or null if connection fails.
+     * Establishes a connection to the H2 In-Memory database.
+     * The 'DB_CLOSE_DELAY=-1' flag is vital: it prevents the database from vanishing
+     * when the last connection is closed, keeping data alive throughout the JVM lifecycle.
      */
-    public Connection getConnection() {
-        Connection connection = null;
+    public static Connection getConnection() {
         try {
-            logger.info("Attempting to connect to database: {}", dbUrl);
-            // Load the PostgreSQL driver explicitly (though often automatic since JDBC 4.0)
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            logger.info("Successfully connected to the database.");
-        } catch (SQLException e) {
-            logger.error("Database connection failed for URL: {}. SQL State: {}. Error: {}", dbUrl, e.getSQLState(), e.getMessage());
-        } catch (ClassNotFoundException e) {
-            logger.fatal("PostgreSQL JDBC Driver not found in classpath. Check pom.xml.", e);
+            Class.forName("org.h2.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", "sa", "");
+
+            // Self-healing schema: Automatically re-creates the table if it's a new memory instance.
+            // This prevents "Table NOT FOUND" errors during parallel or clean test runs.
+            ensureSchemaExists(conn);
+
+            return conn;
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new RuntimeException("DB Connection failed. Check H2 driver dependency or JDBC URL.", e);
         }
-        return connection;
     }
 
     /**
-     * Executes a SELECT query and returns the results as a list of Maps.
-     * Each Map represents one row.
-     * @param query The SQL SELECT query string.
-     * @return A List of Maps containing the query results.
+     * Synchronizes the database structure with the requirements of the entire test suite.
+     * We include all columns (email, lastname, etc.) to satisfy both Orchestrated E2E and Unit tests.
+     */
+    private static void ensureSchemaExists(Connection conn) {
+        String sql = "CREATE TABLE IF NOT EXISTS bookings (" +
+                "booking_id INT PRIMARY KEY, " +
+                "firstname VARCHAR(255), " +
+                "lastname VARCHAR(255), " +
+                "email VARCHAR(255), " +
+                "totalprice INT)";
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            System.err.println("CRITICAL SCHEMA ERROR: Failed to sync table structure: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Executes SELECT queries and maps the ResultSet to a List of Maps.
+     * Key Feature: Normalizes column names to lower case to ensure assertions like .get("email")
+     * work regardless of whether the DB engine returns keys in UPPER or mixed case.
      */
     public List<Map<String, Object>> executeQuery(String query) {
-        List<Map<String, Object>> results = new ArrayList<>();
-        logger.info("Executing database query: {}", query);
-
-        // Use try-with-resources to ensure all resources are closed automatically
+        List<Map<String, Object>> rows = new ArrayList<>();
+        // Using try-with-resources to prevent memory leaks and 'too many open files' on Windows agents.
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
-            if (conn == null) {
-                logger.error("Cannot execute query: Database connection is null.");
-                return results;
-            }
-
-            ResultSetMetaData md = rs.getMetaData();
-            int columns = md.getColumnCount();
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
 
             while (rs.next()) {
-                Map<String, Object> row = new HashMap<>(columns);
-                for (int i = 1; i <= columns; ++i) {
-                    // Use getObject() to handle various SQL types
-                    row.put(md.getColumnName(i).toLowerCase(), rs.getObject(i));
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    // .toLowerCase() is a safeguard for cross-database compatibility (H2/Oracle/Postgres).
+                    row.put(metaData.getColumnName(i).toLowerCase(), rs.getObject(i));
                 }
-                results.add(row);
+                rows.add(row);
             }
-            logger.info("Query execution successful. Retrieved {} rows.", results.size());
-
         } catch (SQLException e) {
-            logger.error("Error executing query: {}. Details: {}", query, e.getMessage());
+            System.err.println("QUERY EXECUTION ERROR: " + e.getMessage());
+            e.printStackTrace();
         }
-        return results;
+        return rows;
     }
 
     /**
-     * Executes an INSERT, UPDATE, or DELETE query.
-     * @param query The SQL DML query string.
-     * @return The number of rows affected.
+     * Handles data modification (INSERT, UPDATE, DELETE).
+     * This is the backbone for data seeding and state-based orchestration between API and UI layers.
      */
-    public int executeUpdate(String query) {
-        int rowsAffected = 0;
-        logger.info("Executing database update: {}", query);
-
+    public void executeUpdate(String query) {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
-
-            if (conn == null) {
-                logger.error("Cannot execute update: Database connection is null.");
-                return 0;
-            }
-            rowsAffected = stmt.executeUpdate(query);
-            logger.info("Update successful. Rows affected: {}", rowsAffected);
+            stmt.executeUpdate(query);
         } catch (SQLException e) {
-            logger.error("Error executing update: {}. Details: {}", query, e.getMessage());
+            System.err.println("UPDATE EXECUTION ERROR: " + e.getMessage());
+            e.printStackTrace();
         }
-        return rowsAffected;
     }
 }
