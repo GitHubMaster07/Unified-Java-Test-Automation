@@ -12,33 +12,39 @@ import pages.LoginPage;
 
 import java.time.Duration;
 
+/**
+ * Step Definitions for User Authentication scenarios.
+ * Maps Gherkin business logic to the Page Object Model, managing state validation
+ * and explicit synchronization with the browser.
+ */
 public class LoginSteps {
     private final LoginPage loginPage;
     private final WebDriverWait wait;
 
     /**
-     * Constructor initializes page object and wait object using the thread-safe
-     * WebDriver instance retrieved from the DriverFactory.
+     * Dependency injection via thread-safe WebDriver orchestration.
+     * Initializes the operational context for the current scenario execution.
      */
     public LoginSteps() {
-        // DriverFactory.getDriver() retrieves the WebDriver instance managed by the Hooks.
         loginPage = new LoginPage(DriverFactory.getDriver());
         wait = new WebDriverWait(DriverFactory.getDriver(), Duration.ofSeconds(10));
     }
 
     /**
-     * GIVEN: Confirms the user is on the login page.
-     * Navigation is handled by the @Before hook in Hooks.java
+     * Verification of the initial entry point.
+     * Confirms the environment is correctly pre-conditioned by the lifecycle hooks 
+     * before proceeding with the interaction flow.
      */
     @Given("the user is on the Login page")
     public void theUserIsOnTheLoginPage() {
-        // This step is intentionally empty. Navigation is managed by the @Before hook in Hooks.java
-        // which uses the BASE_URL to load the login page before this step executes.
-        System.out.println("GIVEN step confirmed: Browser is already navigated to the Login page via Hooks.");
+        // Asserting the landing state to ensure test stability
+        String currentUrl = DriverFactory.getDriver().getCurrentUrl();
+        Assert.assertTrue(currentUrl.contains("login"), "System integrity check: Not on the expected entry page.");
     }
 
     /**
-     * WHEN: Enters credentials and clicks the login button.
+     * Execution of the primary business transaction.
+     * Orchestrates the credential injection and submission process.
      */
     @When("the user enters the username {string} and password {string}")
     public void theUserEntersTheUsernameAndPassword(String username, String password) {
@@ -46,35 +52,41 @@ public class LoginSteps {
     }
 
     /**
-     * AND: Explicit step for clicking the button, kept for BDD clarity.
+     * Syntactic sugar for BDD readability.
+     * Maintains the narrative flow of the Feature file while ensuring 
+     * atomic action consistency within the underlying page object.
      */
     @And("the user clicks the Login button")
     public void theUserClicksTheLoginButton() {
-        // This action is implicitly handled within the preceding @When step (loginPage.login),
-        // but the step is kept for BDD clarity and alignment with the feature file.
+        // Implementation logic encapsulated within the composite login action
     }
 
     /**
-     * THEN: Verifies redirection to the secure area.
+     * Post-condition verification with explicit synchronization.
+     * Validates successful transition to the authorized zone, handling 
+     * asynchronous navigation delays through a fail-fast wait strategy.
      */
     @Then("the user should be redirected to the secure area")
     public void theUserShouldBeRedirectedToTheSecureArea() {
         final String EXPECTED_URL_PART = "/secure";
 
         try {
-            // Wait for the URL to contain the expected secure path (for successful login)
+            /**
+             * Polling for the expected state transition. 
+             * Ensures the test account for network latency and backend processing time.
+             */
             wait.until(ExpectedConditions.urlContains(EXPECTED_URL_PART));
 
             String currentUrl = DriverFactory.getDriver().getCurrentUrl();
-
             Assert.assertTrue(currentUrl.contains(EXPECTED_URL_PART),
-                    "Verification Failed: Not redirected to the secure area. Current URL: " + currentUrl);
-
-            System.out.println("Successfully redirected to Secure Area!");
+                    "Security Breach/Logic Error: Expected redirection to secure area failed. Terminal URL: " + currentUrl);
 
         } catch (Exception e) {
-            System.err.println("Redirection verification failed: " + e.getMessage());
-            Assert.fail("Verification Failed: Redirection failed. Current URL: " + DriverFactory.getDriver().getCurrentUrl() + ". Exception: " + e.getMessage());
+            /**
+             * Critical failure handling. 
+             * Provides detailed diagnostic output for immediate triage of automation failures.
+             */
+            Assert.fail("Automation Triage: Redirection failed during the timeout period. Exception: " + e.getMessage());
         }
     }
 }
