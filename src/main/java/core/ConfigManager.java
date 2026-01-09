@@ -10,7 +10,7 @@ import java.util.Properties;
 /**
  * Manages configuration properties loaded from the environment.properties file.
  * Ensures the properties are loaded only once (Singleton pattern for efficiency).
- */
+ **/
 public class ConfigManager {
 
     private static final Logger logger = LogManager.getLogger(ConfigManager.class);
