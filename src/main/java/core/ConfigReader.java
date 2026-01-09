@@ -7,17 +7,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Utility for safely loading the configuration (properties) file 
- * from the classpath and providing static access to its properties.
- * * FIX: The class now correctly searches for 'config/environment.properties'
- * to resolve the 'url=null' issue in Selenium tests.
+ * Utility for safely loading the configuration file 
  */
 public final class ConfigReader {
     // Logger for logging events and errors
     private static final Logger LOGGER = Logger.getLogger(ConfigReader.class.getName());
 
-    // Corrected Configuration file name and path relative to classpath root
-    // This is the file that contains ui.base.url
+    // This file that contains ui.base.url
     private static final String PROPERTIES_FILE = "config/environment.properties";
 
     // Properties object to store loaded data
@@ -25,13 +21,11 @@ public final class ConfigReader {
 
     // Static initialization block for single-time file loading when the class is loaded
     static {
-        // Attempt to load the file from the classpath
         try (InputStream input = ConfigReader.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
             if (input == null) {
                 // Critical error if the file is not found
                 LOGGER.log(Level.SEVERE, "CRITICAL: Configuration file not found at " + PROPERTIES_FILE + ". Check location and spelling.");
             } else {
-                // Loading properties from the stream
                 try {
                     PROPERTIES.load(input);
                     LOGGER.log(Level.INFO, "Configuration file " + PROPERTIES_FILE + " successfully loaded.");
@@ -49,7 +43,6 @@ public final class ConfigReader {
      * Private constructor to prevent utility class instantiation.
      */
     private ConfigReader() {
-        // Utility class
     }
 
     /**
