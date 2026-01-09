@@ -21,12 +21,18 @@ public class DriverFactory {
                     WebDriverManager.chromedriver().setup();
                     ChromeOptions options = new ChromeOptions();
 
-                    boolean isHeadless = Boolean.parseBoolean(ConfigManager.getProperty("headless", "false"));
+                    // Detect environment: Auto-enable headless mode if running in GitHub Actions (CI=true)
+                    // or if explicitly set to 'true' in config.properties.
+                    boolean isHeadless = Boolean.parseBoolean(ConfigManager.getProperty("headless", "false"))
+                            || System.getenv("CI") != null;
 
                     if (isHeadless) {
-                        // '--headless=new' is used to resolve rendering inconsistencies found in the legacy engine.
-                        // '--no-sandbox' is mandatory for stable execution within Docker/Linux containers.
-                        options.addArguments("--headless=new", "--disable-gpu", "--no-sandbox", "--window-size=1920,1080");
+                        // '--headless=new' is mandatory for stable execution in Linux/CI environments without a GUI.
+                        // '--no-sandbox' and '--disable-dev-shm-usage' prevent memory crashes in containerized runners.
+                        options.addArguments("--headless=new");
+                        options.addArguments("--no-sandbox");
+                        options.addArguments("--disable-dev-shm-usage");
+                        options.addArguments("--window-size=1920,1080");
                     } else {
                         options.addArguments("--start-maximized");
                     }
@@ -51,7 +57,7 @@ public class DriverFactory {
 
     /**
      * Terminating the session and clearing the reference is required to prevent
-     * orphaned 'chromedriver.exe' processes and memory leaks in long-running CI loops.
+     * orphaned processes and memory leaks in long-running CI loops.
      */
     public static void quitDriver() {
         if (driverThreadLocal.get() != null) {
