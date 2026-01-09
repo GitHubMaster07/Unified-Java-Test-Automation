@@ -11,7 +11,6 @@ import java.util.Map;
 
 /**
  * Manages database connectivity (JDBC) and query execution for data validation.
- * Uses configuration details from ConfigManager.
  */
 public class DBManager {
 
@@ -48,7 +47,7 @@ public class DBManager {
 
     /**
      * Executes a SELECT query and returns the results as a list of Maps.
-     * Each Map represents one row (columnName -> value).
+     * Each Map represents one row.
      * @param query The SQL SELECT query string.
      * @return A List of Maps containing the query results.
      */
