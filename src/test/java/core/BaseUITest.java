@@ -22,7 +22,7 @@ public class BaseUITest {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver();
 
-        // --- START IMPROVED CONFIG READING (Line 27 area) ---
+    
         String timeoutValue = ConfigManager.getProperty("ui.timeout.seconds");
         int timeout = 10; // Default implicit wait to 10 seconds for robustness
 
@@ -38,7 +38,6 @@ public class BaseUITest {
         }
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(timeout));
-        // --- END IMPROVED CONFIG READING ---
 
         driver.manage().window().maximize();
 
